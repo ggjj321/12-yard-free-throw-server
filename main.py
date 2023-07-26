@@ -7,20 +7,19 @@ import ssl
 import uuid
 
 import cv2
-import torch
 from aiohttp import web
 from av import VideoFrame
 import aiohttp_cors
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder, MediaRelay
 
+from soccer_detect_calculate import *
+
 ROOT = os.path.dirname(__file__)
 
 logger = logging.getLogger("pc")
 pcs = set()
 relay = MediaRelay()
-model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
-
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -89,10 +88,13 @@ class VideoTransformTrack(MediaStreamTrack):
             new_frame.time_base = frame.time_base
             return new_frame
         else:
-            img = frame.to_ndarray(format="yuv420p")
-            results = model(img)
-            print(results)
-            return frame
+            img = frame.to_ndarray(format="yuv420p")  
+            new_img = soccerDetectAndDraw(img)
+
+            new_frame = VideoFrame.from_ndarray(new_img, format="yuv420p")
+            new_frame.pts = frame.pts
+            new_frame.time_base = frame.time_base
+            return new_frame
 
 
 async def index(request):
