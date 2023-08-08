@@ -3,7 +3,6 @@ import torch
 import math
 import numpy as np
 import time
-import result_data
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
