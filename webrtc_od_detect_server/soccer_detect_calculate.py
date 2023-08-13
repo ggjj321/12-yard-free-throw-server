@@ -1,5 +1,6 @@
 import cv2
 import torch
+import math
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
@@ -65,26 +66,58 @@ def draw_split_line(img, top_left, down_left, top_right, top_basis, down_basis, 
     
     return img
 
-def detect_ball_local(img, ball_height, ball):
-    font = cv2.FONT_HERSHEY_SIMPLEX
-  
-    # org
-    org = (50, 50)
+def detect_ball_local(img, ball, top_left, top_right, down_left, top_basis, down_basis, right_basis, left_basis):
+    distance_left = left_basis[0] ** 2 + left_basis[1] ** 2
+    distance_right = right_basis[0] ** 2 + right_basis[1] ** 2 
+
+    if distance_left > distance_right:
+        hor_origin_point = top_left
+        hor_basis = left_basis
+    else:
+        hor_origin_point = top_right
+        hor_basis = right_basis
     
-    # fontScale
+    distance_top = top_basis[0] ** 2 + top_basis[1] ** 2
+    distance_down = down_basis[0] ** 2 + down_basis[1] ** 2 
+
+    if distance_top > distance_down:
+        vertical_origin_point = top_left
+        vertical_basis = top_basis
+    else:
+        vertical_origin_point = down_left
+        vertical_basis = down_basis
+
+    hor_pos = 4
+    vertical_pos = 5
+
+    for hor_index in range(1, 4):
+        if hor_origin_point[0] + (hor_index - 1) * hor_basis[0] < ball.center_x and ball.center_x < hor_origin_point[0] + hor_index * hor_basis[0] \
+        and hor_origin_point[1] + (hor_index - 1) * hor_basis[1] < ball.center_y and ball.center_y < hor_origin_point[1] + hor_index * hor_basis[1]:
+            hor_pos = hor_index - 1 
+            break
+
+    for vertical_index in range(1, 5):
+        if vertical_origin_point[0] + (vertical_index - 1) * vertical_basis[0] < ball.center_x and ball.center_x < vertical_origin_point[0] + vertical_index * vertical_basis[0] \
+        and vertical_origin_point[1] + (vertical_index - 1) * vertical_basis[1] < ball.center_y and ball.center_y < vertical_origin_point[1] + vertical_index * vertical_basis[1]:
+            vertical_pos = vertical_index - 1
+            break
+    
+    shoot_pos = hor_pos * 4 + vertical_pos + 1
+
+    org = (50, 50)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    
     fontScale = 1
     
-    # Blue color in BGR
     color = (255, 0, 0)
     
-    # Line thickness of 2 px
     thickness = 2
     
     # Using cv2.putText() method
-    img = cv2.putText(img, "shoot", org, font, 
+    img = cv2.putText(img, str(shoot_pos), org, font, 
                     fontScale, color, thickness, cv2.LINE_AA)
-    
-    cv2.rectangle(img, (ball.x_min, ball.y_min), (ball.x_max, ball.y_max), (255, 255, 0), 2)
+
+
 
 def soccerDetectAndDraw(img):
     results = model(img)
@@ -159,6 +192,6 @@ def soccerDetectAndDraw(img):
             goal_height_left = down_left[1] - top_left[1]
 
             if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
-                detect_ball_local(img, ball_height, detect_object["ball"])
+                detect_ball_local(img, detect_object["ball"], top_left, top_right, down_left, top_basis, down_basis, right_basis, left_basis)
 
     return img
