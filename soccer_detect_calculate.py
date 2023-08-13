@@ -65,6 +65,27 @@ def draw_split_line(img, top_left, down_left, top_right, top_basis, down_basis, 
     
     return img
 
+def detect_ball_local(img, ball_height, ball):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+  
+    # org
+    org = (50, 50)
+    
+    # fontScale
+    fontScale = 1
+    
+    # Blue color in BGR
+    color = (255, 0, 0)
+    
+    # Line thickness of 2 px
+    thickness = 2
+    
+    # Using cv2.putText() method
+    img = cv2.putText(img, "shoot", org, font, 
+                    fontScale, color, thickness, cv2.LINE_AA)
+    
+    cv2.rectangle(img, (ball.x_min, ball.y_min), (ball.x_max, ball.y_max), (255, 255, 0), 2)
+
 def soccerDetectAndDraw(img):
     results = model(img)
     df = results.pandas().xyxy[0]
@@ -131,5 +152,13 @@ def soccerDetectAndDraw(img):
         right_basis = (int((down_right[0] - top_right[0]) / 3), int((down_right[1] - top_right[1]) / 3))
 
         draw_split_line(img, top_left, down_left, top_right, top_basis, down_basis, left_basis, right_basis)
+
+        if detect_object["ball"].confidence != None:
+            ball_height = detect_object["ball"].y_max - detect_object["ball"].y_min
+            goal_height_right = down_right[1] - top_right[1]
+            goal_height_left = down_left[1] - top_left[1]
+
+            if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
+                detect_ball_local(img, ball_height, detect_object["ball"])
 
     return img
