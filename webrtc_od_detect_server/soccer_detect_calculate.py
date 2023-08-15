@@ -1,10 +1,12 @@
 import cv2
 import torch
 import numpy as np
+import redis
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
 model.to(mps_device)
+red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 class DetectionObject():
     def __init__(self):
@@ -164,6 +166,14 @@ def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basi
         return 12
     return 13
 
+def record_shoot_status(locate):
+    grid_shoot_data = red_server.hgetall("grid_shoot_data")
+    grid_shoot_data[locate] += 1
+    shoot_time = int(red_server.get("shoot_time"))
+    red_server.set('is_shoot_time', "False")
+    red_server.set('shoot_time', shoot_time + 1)
+    red_server.hmset('grid_shoot_data', grid_shoot_data)
+
 
 def soccerDetectAndDraw(img):
     results = model(img)
@@ -238,7 +248,8 @@ def soccerDetectAndDraw(img):
             goal_height_left = down_left[1] - top_left[1]
 
             if goal_height_left / ball_height > 9 or goal_height_right / ball_height > 10:
-                locall = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
-                print(locall)
-                draw_shoot_result(img=img, result=locall)
+                is_shoot_time = red_server.get("shoot_time")
+                if is_shoot_time:
+                    locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
+                    record_shoot_status(locate)
     return img
