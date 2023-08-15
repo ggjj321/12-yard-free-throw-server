@@ -6,12 +6,11 @@ import os
 import ssl
 import uuid
 
-import cv2
 from aiohttp import web
 from av import VideoFrame
 import aiohttp_cors
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
-from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder, MediaRelay
+from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRelay
 
 from soccer_detect_calculate import *
 

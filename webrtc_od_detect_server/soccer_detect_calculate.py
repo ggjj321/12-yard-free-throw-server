@@ -1,6 +1,6 @@
 import cv2
 import torch
-import math
+import numpy as np
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
@@ -66,57 +66,103 @@ def draw_split_line(img, top_left, down_left, top_right, top_basis, down_basis, 
     
     return img
 
-def detect_ball_local(img, ball, top_left, top_right, down_left, top_basis, down_basis, right_basis, left_basis):
-    distance_left = left_basis[0] ** 2 + left_basis[1] ** 2
-    distance_right = right_basis[0] ** 2 + right_basis[1] ** 2 
-
-    if distance_left > distance_right:
-        hor_origin_point = top_left
-        hor_basis = left_basis
-    else:
-        hor_origin_point = top_right
-        hor_basis = right_basis
-    
-    distance_top = top_basis[0] ** 2 + top_basis[1] ** 2
-    distance_down = down_basis[0] ** 2 + down_basis[1] ** 2 
-
-    if distance_top > distance_down:
-        vertical_origin_point = top_left
-        vertical_basis = top_basis
-    else:
-        vertical_origin_point = down_left
-        vertical_basis = down_basis
-
-    hor_pos = 4
-    vertical_pos = 5
-
-    for hor_index in range(1, 4):
-        if hor_origin_point[0] + (hor_index - 1) * hor_basis[0] < ball.center_x and ball.center_x < hor_origin_point[0] + hor_index * hor_basis[0] \
-        and hor_origin_point[1] + (hor_index - 1) * hor_basis[1] < ball.center_y and ball.center_y < hor_origin_point[1] + hor_index * hor_basis[1]:
-            hor_pos = hor_index - 1 
-            break
-
-    for vertical_index in range(1, 5):
-        if vertical_origin_point[0] + (vertical_index - 1) * vertical_basis[0] < ball.center_x and ball.center_x < vertical_origin_point[0] + vertical_index * vertical_basis[0] \
-        and vertical_origin_point[1] + (vertical_index - 1) * vertical_basis[1] < ball.center_y and ball.center_y < vertical_origin_point[1] + vertical_index * vertical_basis[1]:
-            vertical_pos = vertical_index - 1
-            break
-    
-    shoot_pos = hor_pos * 4 + vertical_pos + 1
-
-    org = (50, 50)
+def draw_shoot_result(img, result):
     font = cv2.FONT_HERSHEY_SIMPLEX
-    
-    fontScale = 1
-    
-    color = (255, 0, 0)
-    
-    thickness = 2
-    
-    # Using cv2.putText() method
-    img = cv2.putText(img, str(shoot_pos), org, font, 
-                    fontScale, color, thickness, cv2.LINE_AA)
+    font_scale = 1.5
+    font_color = (0, 0, 255)  # BGR 格式的顏色，這裡是紅色
+    font_thickness = 2
 
+    cv2.putText(img, str(result), (50,50), font, font_scale, font_color, font_thickness)
+
+def find_intersection(x1, y1, x2, y2, x3, y3, x4, y4):
+    A = np.array([[y2 - y1, x1 - x2],
+                  [y4 - y3, x3 - x4]])
+    B = np.array([x1 * (y2 - y1) - y1 * (x2 - x1),
+                  x3 * (y4 - y3) - y3 * (x4 - x3)])
+    
+    intersection = np.linalg.solve(A, B)
+    return (intersection[0], intersection[1])
+
+def is_ball_in_range(ball, block_1_corner, block_2_corner, block_3_corner, block_4_corner):
+    # 1 2
+    # 3 4
+    if ball.center_x < block_1_corner[0] or ball.center_y < block_1_corner[1]:
+        return False
+    if ball.center_x > block_2_corner[0] or ball.center_y < block_1_corner[1]:
+        return False
+    if ball.center_x < block_3_corner[0] or ball.center_y > block_3_corner[1]:
+        return False
+    if ball.center_x > block_4_corner[0] or ball.center_y > block_4_corner[1]:
+        return False
+    return True
+
+
+def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis):
+    
+    # order
+    # 1  2  3  4  5
+    # 6  7  8  9  10
+    # 11 12 13 14 15
+    # 16 17 18 19 20
+
+    corner1 = top_left
+    corner2 = (top_left[0] + top_basis[0], top_left[1] + top_basis[1])
+    corner3 = (top_left[0] + 2 * top_basis[0], top_left[1] + 2 * top_basis[1])
+    corner4 = (top_left[0] + 3 * top_basis[0], top_left[1] + 3 * top_basis[1])
+    corner5 = top_right
+    corner10 = (top_right[0] + right_basis[0], top_right[1] + right_basis[1])
+    corner15 = (top_right[0] + 2 * right_basis[0], top_right[1] + 2 * right_basis[1])
+    corner20 = down_right
+    corner19 = (down_left[0] + 3 * down_basis[0], down_left[1] + 3 * down_basis[1])
+    corner18 = (down_left[0] + 2 * down_basis[0], down_left[1] + 2 * down_basis[1])
+    corner17 = (down_left[0] + down_basis[0], down_left[1] + down_basis[1])
+    corner16 = down_left
+    corner11 = (top_left[0] + 2 * left_basis[0], top_left[1] + 2 * left_basis[1])
+    corner6 = (top_left[0] + left_basis[0], top_left[1] + left_basis[1])
+
+    corner7 = find_intersection(corner2[0], corner2[1], corner17[0], corner17[1], corner6[0], corner6[1], corner10[0], corner10[1])
+    corner8 = find_intersection(corner3[0], corner3[1], corner18[0], corner18[1], corner6[0], corner6[1], corner10[0], corner10[1])
+    corner9 = find_intersection(corner4[0], corner4[1], corner19[0], corner19[1], corner6[0], corner6[1], corner10[0], corner10[1])
+    corner12 = find_intersection(corner2[0], corner2[1], corner17[0], corner17[1], corner11[0], corner11[1], corner15[0], corner15[1])
+    corner13 = find_intersection(corner3[0], corner3[1], corner18[0], corner18[1], corner11[0], corner11[1], corner15[0], corner15[1])
+    corner14 = find_intersection(corner4[0], corner4[1], corner19[0], corner19[1], corner11[0], corner11[1], corner15[0], corner15[1])
+
+    if is_ball_in_range(ball, corner1, corner2, corner6, corner7):
+        return 1
+    
+    if is_ball_in_range(ball, corner2, corner3, corner7, corner8):
+        return 2
+    
+    if is_ball_in_range(ball, corner3, corner4, corner8, corner9):
+        return 3
+    
+    if is_ball_in_range(ball, corner4, corner5, corner9, corner10):
+        return 4
+    
+    if is_ball_in_range(ball, corner6, corner7, corner11, corner12):
+        return 5
+    
+    if is_ball_in_range(ball, corner7, corner8, corner12, corner13):
+        return 6
+    
+    if is_ball_in_range(ball, corner8, corner9, corner13, corner14):
+        return 7
+    
+    if is_ball_in_range(ball, corner9, corner10, corner14, corner15):
+        return 8
+    
+    if is_ball_in_range(ball, corner11, corner12, corner16, corner17):
+        return 9
+    
+    if is_ball_in_range(ball, corner12, corner13, corner17, corner18):
+        return 10
+    
+    if is_ball_in_range(ball, corner13, corner14, corner18, corner19):
+        return 11
+    
+    if is_ball_in_range(ball, corner14, corner15, corner19, corner20):
+        return 12
+    return 13
 
 
 def soccerDetectAndDraw(img):
@@ -191,7 +237,8 @@ def soccerDetectAndDraw(img):
             goal_height_right = down_right[1] - top_right[1]
             goal_height_left = down_left[1] - top_left[1]
 
-            if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
-                detect_ball_local(img, detect_object["ball"], top_left, top_right, down_left, top_basis, down_basis, right_basis, left_basis)
-
+            if goal_height_left / ball_height > 9 or goal_height_right / ball_height > 10:
+                locall = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
+                print(locall)
+                draw_shoot_result(img=img, result=locall)
     return img
