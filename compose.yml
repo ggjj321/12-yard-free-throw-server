@@ -1,0 +1,11 @@
+services:
+  webrtc_od_detect_server:
+    build: 
+      context: webrtc_od_detect_server
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    volumes:
+      - ./webrtc_od_detect_server/src:/src
+    command: >
+      sh -c "python main.py"

@@ -5,8 +5,10 @@ import redis
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
-model.to(mps_device)
 red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
+if torch.backends.mps.is_available():
+    print("mps")
+    model.to(mps_device)
 
 class DetectionObject():
     def __init__(self):
@@ -251,5 +253,5 @@ def soccerDetectAndDraw(img):
                 is_shoot_time = red_server.get("shoot_time")
                 if is_shoot_time:
                     locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
-                    record_shoot_status(locate)
+                    # record_shoot_status(locate)
     return img

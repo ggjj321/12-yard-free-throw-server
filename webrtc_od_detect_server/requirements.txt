@@ -1,0 +1,17 @@
+# WebRTC 
+aiohttp
+aiortc
+av
+aiohttp_cors
+redis[hiredis]
+
+opencv-python
+ultralytics
+numpy
+pandas
+scipy
+matplotlib
+torch 
+torchvision
+pillow
+tqdm

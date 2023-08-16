@@ -13,6 +13,7 @@ def read_root(total_shoot_time : int, shoot_target : int):
         grid_shoot_data[grid_index] = 0
     
     red_server.set('shoot_time', 0)
+    red_server.set('is_shoot_time', True)
     red_server.hmset('grid_shoot_data', grid_shoot_data)
     
     while int(red_server.get("shoot_time")) < int(total_shoot_time):
