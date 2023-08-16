@@ -1,4 +1,6 @@
 services:
+  redis:
+    image: "redis:alpine"
   webrtc_od_detect_server:
     build: 
       context: webrtc_od_detect_server
