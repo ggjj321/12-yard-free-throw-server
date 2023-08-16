@@ -9,3 +9,10 @@ services:
       - ./webrtc_od_detect_server/src:/src
     command: >
       sh -c "python main.py"
+  fastapi_server:
+      build:
+        context: fastapi_server
+      ports:
+        - "80:80"
+      volumes:
+        - ./fastapi_server/app:/app
