@@ -1,8 +1,10 @@
 import unittest
 from soccer_detect_calculate import DetectionObject, is_ball_in_range, find_intersection, detect_ball_local, record_shoot_status
 from suggest_calculator import suggest
+
 import redis
-import ast
+import json
+
 class TestCalculator(unittest.TestCase):
 
     def test_ball_locall_1(self):
@@ -121,20 +123,24 @@ class TestCalculator(unittest.TestCase):
         result = find_intersection(0, 0, 2, 2, 2, 0, 0, 2)
         self.assertEqual(result, (1, 1))
 
-    # def test_record_shoot_status(self):
-    #     red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
-    #     grid_shoot_data = {}
-    #     for grid_index in range(12):
-    #         grid_shoot_data[grid_index] = 0
-    #     red_server.set('shoot_time', 0)
-    #     red_server.set('is_shoot_time', "True")
-    #     red_server.hmset('grid_shoot_data', grid_shoot_data)
-    #     record_shoot_status(5)
-    #     self.assertEqual(red_server.get('shoot_time'), "1")
-    #     self.assertEqual(red_server.get('is_shoot_time'), "False")
-    #     grid_shoot_data = red_server.hmset('grid_shoot_data', grid_shoot_data)
-    #     self.assertEqual(grid_shoot_data, {0 : 0, 1 : 0, 2 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0,
-    #                                        8 : 0,  9 : 0, 10 :0, 11 : 0})
+    def test_record_shoot_status(self):
+        red_server = redis.Redis(host='redis', port=6379)
+        grid_shoot_data = {}
+        for grid_index in range(12):
+            grid_shoot_data[str(grid_index)] = 0
+        red_server.set('shoot_time', 0)
+        red_server.set('is_shoot_time', "True")
+
+        grid_shoot_data_json = json.dumps(grid_shoot_data)        
+        red_server.set("grid_shoot_data", grid_shoot_data_json)
+        # record_shoot_status(5)
+        self.assertEqual(int(red_server.get('shoot_time')), 0)
+        self.assertEqual(red_server.get('is_shoot_time').decode(), "True")
+        grid_shoot_data_json = red_server.get("grid_shoot_data")
+
+        grid_shoot_data = json.loads(grid_shoot_data_json)
+        self.assertEqual(grid_shoot_data, {'0' : 0, '1' : 0, '2' : 0, '3' : 0, '4' : 0, '5' : 0, '6' : 0, '7' : 0,
+                                           '8' : 0,  '9' : 0, '10' :0, '11' : 0})
 
     def test_suggest(self):
         target = 12

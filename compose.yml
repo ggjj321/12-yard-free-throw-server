@@ -1,6 +1,7 @@
 services:
   redis:
     image: "redis:alpine"
+
   webrtc_od_detect_server:
     build: 
       context: webrtc_od_detect_server
@@ -10,11 +11,21 @@ services:
     volumes:
       - ./webrtc_od_detect_server/src:/src
     command: >
-      sh -c "python main.py"
+      sh -c "python server_test.py"
+
   fastapi_server:
-      build:
-        context: fastapi_server
-      ports:
-        - "80:80"
-      volumes:
-        - ./fastapi_server/app:/app
+    build:
+      context: fastapi_server
+    ports:
+      - "80:80"
+    volumes:
+      - ./fastapi_server/app:/app
+      
+  watch_socket_server:
+    build: 
+      context: 
+        watch_socket_server
+    ports:
+      - "10000:1000"
+    volumes:
+      - ./watch_socket_server/app:/app

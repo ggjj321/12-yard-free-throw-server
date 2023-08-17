@@ -5,7 +5,7 @@ import redis
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
-red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
+red_server = red_server = redis.Redis(host='redis', port=6379)
 if torch.backends.mps.is_available():
     print("mps")
     model.to(mps_device)
@@ -170,7 +170,7 @@ def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basi
 
 def record_shoot_status(locate):
     grid_shoot_data = red_server.hgetall("grid_shoot_data")
-    grid_shoot_data[locate] += 1
+    grid_shoot_data[locate] = grid_shoot_data[locate] + 1
     shoot_time = int(red_server.get("shoot_time"))
     red_server.set('is_shoot_time', "False")
     red_server.set('shoot_time', shoot_time + 1)
