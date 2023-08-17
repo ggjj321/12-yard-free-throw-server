@@ -2,6 +2,7 @@ import cv2
 import torch
 import numpy as np
 import redis
+import json
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
@@ -169,12 +170,16 @@ def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basi
     return 13
 
 def record_shoot_status(locate):
-    grid_shoot_data = red_server.hgetall("grid_shoot_data")
-    grid_shoot_data[locate] = grid_shoot_data[locate] + 1
+    grid_shoot_data_json = red_server.get("grid_shoot_data")
+    grid_shoot_data = json.loads(grid_shoot_data_json)
+    grid_shoot_data[locate] = grid_shoot_data[str(locate)] + 1
+    grid_shoot_data_json = json.dumps(grid_shoot_data)
+
     shoot_time = int(red_server.get("shoot_time"))
+
     red_server.set('is_shoot_time', "False")
     red_server.set('shoot_time', shoot_time + 1)
-    red_server.hmset('grid_shoot_data', grid_shoot_data)
+    red_server.set('grid_shoot_data', grid_shoot_data_json)
 
 
 def soccerDetectAndDraw(img):

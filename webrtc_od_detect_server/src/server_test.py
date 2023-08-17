@@ -133,13 +133,14 @@ class TestCalculator(unittest.TestCase):
 
         grid_shoot_data_json = json.dumps(grid_shoot_data)        
         red_server.set("grid_shoot_data", grid_shoot_data_json)
-        # record_shoot_status(5)
-        self.assertEqual(int(red_server.get('shoot_time')), 0)
-        self.assertEqual(red_server.get('is_shoot_time').decode(), "True")
+        
+        record_shoot_status(5)
+        self.assertEqual(int(red_server.get('shoot_time')), 1)
+        self.assertEqual(red_server.get('is_shoot_time').decode(), "False")
         grid_shoot_data_json = red_server.get("grid_shoot_data")
 
         grid_shoot_data = json.loads(grid_shoot_data_json)
-        self.assertEqual(grid_shoot_data, {'0' : 0, '1' : 0, '2' : 0, '3' : 0, '4' : 0, '5' : 0, '6' : 0, '7' : 0,
+        self.assertEqual(grid_shoot_data, {'0' : 0, '1' : 0, '2' : 0, '3' : 0, '4' : 0, '5' : 1, '6' : 0, '7' : 0,
                                            '8' : 0,  '9' : 0, '10' :0, '11' : 0})
 
     def test_suggest(self):
