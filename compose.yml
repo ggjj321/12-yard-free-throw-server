@@ -1,6 +1,17 @@
 services:
   redis:
     image: "redis:alpine"
+  
+  watch_socket_server:
+    build: 
+      context: 
+        watch_socket_server
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./watch_socket_server/app:/app
+    command: >
+        sh -c "python watch_socket_test.py"
 
   webrtc_od_detect_server:
     build: 
@@ -20,12 +31,4 @@ services:
       - "80:80"
     volumes:
       - ./fastapi_server/app:/app
-      
-  watch_socket_server:
-    build: 
-      context: 
-        watch_socket_server
-    ports:
-      - "10000:1000"
-    volumes:
-      - ./watch_socket_server/app:/app
+    #   sh -c "python watch_socket_test.py"
