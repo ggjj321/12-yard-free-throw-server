@@ -6,7 +6,7 @@ app = FastAPI()
 
 @app.get("/get_shoot_result/{total_shoot_time}/{shoot_target}")
 def read_root(total_shoot_time : int, shoot_target : int):
-    red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    red_server = redis.Redis(host='redis', port=6379, decode_responses=True)
     
     grid_shoot_data = {}
     for grid_index in range(12):

@@ -1,7 +1,7 @@
 import redis
 import time
 
-red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
+red_server = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 time.sleep(3)
 

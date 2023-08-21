@@ -6,7 +6,7 @@ import json
 
 mps_device = torch.device("mps")
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
-red_server = red_server = redis.Redis(host='localhost', port=6379)
+red_server = red_server = redis.Redis(host='redis', port=6379)
 if torch.backends.mps.is_available():
     print("mps")
     model.to(mps_device)

@@ -11,7 +11,7 @@ server_socket.listen(1)
 
 # 接受客戶端連接
 
-red_server = redis.Redis(host='localhost', port=6379, decode_responses=True)
+red_server = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 print("socket start")
 

@@ -124,7 +124,7 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(result, (1, 1))
 
     def test_record_shoot_status(self):
-        red_server = redis.Redis(host='localhost', port=6379)
+        red_server = redis.Redis(host='redis', port=6379)
         grid_shoot_data = {}
         for grid_index in range(12):
             grid_shoot_data[str(grid_index)] = 0
