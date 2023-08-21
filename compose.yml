@@ -33,5 +33,5 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./fastapi_server/app:/app
+      - ./fastapi_server/app:/code/app
     #   sh -c "python watch_socket_test.py"

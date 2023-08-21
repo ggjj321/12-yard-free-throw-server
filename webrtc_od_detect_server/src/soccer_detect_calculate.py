@@ -170,20 +170,23 @@ def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basi
     return 13
 
 def record_shoot_status(locate):
-    grid_shoot_data_json = red_server.get("grid_shoot_data")
-    grid_shoot_data = json.loads(grid_shoot_data_json)
-    grid_shoot_data[locate] = grid_shoot_data[str(locate)] + 1
-    grid_shoot_data_json = json.dumps(grid_shoot_data)
+    if locate != 13:
+        grid_shoot_data_json = red_server.get("grid_shoot_data")
+        grid_shoot_data = json.loads(grid_shoot_data_json)
+        grid_shoot_data[locate] = grid_shoot_data[str(locate)] + 1
+        grid_shoot_data_json = json.dumps(grid_shoot_data)
 
-    shoot_time = int(red_server.get("shoot_time"))
+        shoot_time = int(red_server.get("shoot_time"))
 
-    red_server.set('is_shoot_time', "False")
-    red_server.set('shoot_time', shoot_time + 1)
-    red_server.set('grid_shoot_data', grid_shoot_data_json)
+        red_server.set('is_shoot_time', "False")
+        red_server.set('shoot_time', shoot_time + 1)
+        red_server.set('grid_shoot_data', grid_shoot_data_json)
 
 
 def soccerDetectAndDraw(img):
-    is_shoot_time = red_server.get("start shoot")
+    is_shoot_time = red_server.get("is_shoot_time").decode()
+
+    print(is_shoot_time)
 
     if is_shoot_time == "False":
         return img
