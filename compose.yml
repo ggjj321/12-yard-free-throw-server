@@ -11,6 +11,7 @@ services:
     volumes:
       - ./watch_socket_server/app:/app
     command: >
+        sh -c "python watch_socket_server.py"
         sh -c "python watch_socket_test.py"
 
   webrtc_od_detect_server:
