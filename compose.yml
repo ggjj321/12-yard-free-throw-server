@@ -1,6 +1,7 @@
 services:
   redis:
     image: "redis:alpine"
+    network_mode: host
   
   watch_socket_server:
     build: 
@@ -13,6 +14,7 @@ services:
     command: >
         sh -c "python watch_socket_server.py"
         sh -c "python watch_socket_test.py"
+    network_mode: host
 
   webrtc_od_detect_server:
     build: 
@@ -24,6 +26,7 @@ services:
       - ./webrtc_od_detect_server/src:/src
     command: >
       sh -c "python server_test.py"
+    network_mode: host
 
   fastapi_server:
     build:
@@ -32,4 +35,5 @@ services:
       - "80:80"
     volumes:
       - ./fastapi_server/app:/app
+    network_mode: host
     #   sh -c "python watch_socket_test.py"

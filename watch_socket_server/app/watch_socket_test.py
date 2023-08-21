@@ -4,7 +4,7 @@ import redis
 
 class TestCalculator(unittest.TestCase):
     def test_socket_send(self):
-        red_server = redis.Redis(host='redis', port=6379)
+        red_server = redis.Redis(host='localhost', port=6379)
 
         red_server.set('is_shoot_time', "False")
 
