@@ -1,7 +1,9 @@
 services:
   redis:
     image: "redis:alpine"
-  
+    ports:
+      - "6379:6379"
+
   watch_socket_server:
     build: 
       context: 
@@ -12,7 +14,7 @@ services:
       - ./watch_socket_server/app:/app
     command: >
         sh -c "python watch_socket_server.py"
-        sh -c "python watch_socket_test.py"
+    stop_signal: SIGINT
 
   webrtc_od_detect_server:
     build: 
