@@ -140,9 +140,3 @@ def suggest(target, total_shoot_time, data):
         hit_pos = "擊球點再往下移並且大腿不用帶動球往上"
 
     return {"percentage" : percentage, "pivot_foot_bias" : pivot_foot_bias, "hit_pos" : hit_pos}
-
-data = {1 : 0, 2 : 5, 3 : 0, 4 : 0, 5 : 1, 6 : 0, 7 : 0, 8 : 0,  9 : 0, 10 : 14, 11 : 0, 12 : 0}
-
-print_data(data)
-sug = suggest(10, 20, data)
-print(sug)
