@@ -262,7 +262,7 @@ def soccerDetectAndDraw(img):
             goal_height_right = down_right[1] - top_right[1]
             goal_height_left = down_left[1] - top_left[1]
 
-            if goal_height_left / ball_height > 9 or goal_height_right / ball_height > 10:
+            if goal_height_left / ball_height > 8.5 or goal_height_right / ball_height > 8.5:
                 is_shoot_time = red_server.get("shoot_time")
                 if is_shoot_time:
                     locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)

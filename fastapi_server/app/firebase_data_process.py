@@ -6,7 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 
-cred = credentials.Certificate("./yard-soccer-detection-firebase-adminsdk-kfvya-70e5867256.json")
+cred = credentials.Certificate("/code/./app/yard-soccer-detection-firebase-adminsdk-kfvya-70e5867256.json")
 
 firebase_admin.initialize_app(cred, {'databaseURL': 'https://12-yard-soccer-detection.firebaseio.com'})
 

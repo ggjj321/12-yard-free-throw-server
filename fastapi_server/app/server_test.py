@@ -1,6 +1,6 @@
 import unittest
-from firebase import save_data_to_firebase_db
-from suggest import suggest
+from firebase_data_process import *
+from suggest import *
 
 class TestCalculator(unittest.TestCase):
     def test_save_data_to_firebase_db(self):
