@@ -11,9 +11,9 @@ class TestCalculator(unittest.TestCase):
         for i in range(1, 13):
             convert_data[i] = data[str(i)]
 
-        result = suggest(10, 20, convert_data)
+        result = suggest(2, 20, convert_data)
 
-        save_data_to_firebase_db(data, result["percentage"], result["pivot_foot_bias"], result["hit_pos"])
+        save_data_to_firebase_db(data, result["percentage"], result["pivot_foot_bias"], result["hit_pos"], 10)
 
 
 if __name__ == '__main__':

@@ -32,6 +32,6 @@ def read_root(total_shoot_time : int, shoot_target : int):
         convert_grid_shoot_data[i] = grid_shoot_data[str(i - 1)]
 
     suggest_result = suggest(int(shoot_target), int(total_shoot_time), convert_grid_shoot_data)
-    save_data_to_firebase_db(convert_grid_shoot_data, suggest_result["percentage"], suggest_result["pivot_foot_bias"], suggest_result["hit_pos"])
+    save_data_to_firebase_db(convert_grid_shoot_data, suggest_result["percentage"], suggest_result["pivot_foot_bias"], suggest_result["hit_pos"], int(shoot_target))
                                          
     return "success"
