@@ -18,7 +18,7 @@ def save_data_to_firebase_db(grid_shoot_data, percentage, pivot_foot_bias, hit_p
         "pivot_foot_bias" : pivot_foot_bias,
         "hit_pos" : hit_pos,
         "target" : target,
-        "created_at": datetime.datetime.now
+        "created_at": datetime.datetime.now()
     } 
 
     db = firestore.client()
