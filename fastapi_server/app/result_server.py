@@ -12,7 +12,7 @@ red_server = redis.Redis(host='redis', port=6379, decode_responses=True)
 @app.get("/get_shoot_result/{total_shoot_time}/{shoot_target}")
 def read_root(total_shoot_time : int, shoot_target : int):
     grid_shoot_data = {}
-    for grid_index in range(12):
+    for grid_index in range(1, 13):
         grid_shoot_data[str(grid_index)] = 0
     
     red_server.set('shoot_time', 0)
@@ -29,7 +29,7 @@ def read_root(total_shoot_time : int, shoot_target : int):
     convert_grid_shoot_data = {}
 
     for i in range(1, 13):
-        convert_grid_shoot_data[i] = grid_shoot_data[str(i - 1)]
+        convert_grid_shoot_data[i] = grid_shoot_data[str(i)]
 
     suggest_result = suggest(int(shoot_target), int(total_shoot_time), convert_grid_shoot_data)
     save_data_to_firebase_db(convert_grid_shoot_data, suggest_result["percentage"], suggest_result["pivot_foot_bias"], suggest_result["hit_pos"], int(shoot_target))

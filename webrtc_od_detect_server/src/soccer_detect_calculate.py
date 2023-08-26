@@ -79,21 +79,37 @@ def draw_shoot_result(img, result):
 
     cv2.putText(img, str(result), (50,50), font, font_scale, font_color, font_thickness)
 
-def find_intersection(x1, y1, x2, y2, x3, y3, x4, y4):
-    A = np.array([[y2 - y1, x1 - x2],
-                  [y4 - y3, x3 - x4]])
-    B = np.array([x1 * (y2 - y1) - y1 * (x2 - x1),
-                  x3 * (y4 - y3) - y3 * (x4 - x3)])
+def find_intersection(a, b, c, d):
+    # 將點轉換為NumPy陣列以便進行向量運算
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    d = np.array(d)
     
-    intersection = np.linalg.solve(A, B)
-    return (intersection[0], intersection[1])
+    # 計算方向向量
+    direction_p1 = b - a
+    direction_p2 = d - c
+    
+    # 使用 NumPy 的 cross 函數計算交叉乘積
+    cross_product = np.cross(direction_p1, direction_p2)
+    
+    # 檢查 cross_product 是否為零，以確定是否平行或共線
+    if np.isclose(cross_product, 0):
+        return None  # 平行或共線，沒有交點
+    
+    t = np.cross(c - a, direction_p2) / cross_product
+    
+    # 使用 t 值找到交點座標
+    intersection = a + t * direction_p1
+    
+    return intersection
 
 def is_ball_in_range(ball, block_1_corner, block_2_corner, block_3_corner, block_4_corner):
     # 1 2
     # 3 4
     if ball.center_x < block_1_corner[0] or ball.center_y < block_1_corner[1]:
         return False
-    if ball.center_x > block_2_corner[0] or ball.center_y < block_1_corner[1]:
+    if ball.center_x > block_2_corner[0] or ball.center_y < block_2_corner[1]:
         return False
     if ball.center_x < block_3_corner[0] or ball.center_y > block_3_corner[1]:
         return False
@@ -125,12 +141,12 @@ def detect_ball_local(ball, top_left, top_right, down_left, down_right, top_basi
     corner11 = (top_left[0] + 2 * left_basis[0], top_left[1] + 2 * left_basis[1])
     corner6 = (top_left[0] + left_basis[0], top_left[1] + left_basis[1])
 
-    corner7 = find_intersection(corner2[0], corner2[1], corner17[0], corner17[1], corner6[0], corner6[1], corner10[0], corner10[1])
-    corner8 = find_intersection(corner3[0], corner3[1], corner18[0], corner18[1], corner6[0], corner6[1], corner10[0], corner10[1])
-    corner9 = find_intersection(corner4[0], corner4[1], corner19[0], corner19[1], corner6[0], corner6[1], corner10[0], corner10[1])
-    corner12 = find_intersection(corner2[0], corner2[1], corner17[0], corner17[1], corner11[0], corner11[1], corner15[0], corner15[1])
-    corner13 = find_intersection(corner3[0], corner3[1], corner18[0], corner18[1], corner11[0], corner11[1], corner15[0], corner15[1])
-    corner14 = find_intersection(corner4[0], corner4[1], corner19[0], corner19[1], corner11[0], corner11[1], corner15[0], corner15[1])
+    corner7 = find_intersection(corner2, corner17, corner6, corner10)
+    corner8 = find_intersection(corner3, corner18, corner6, corner10)
+    corner9 = find_intersection(corner4, corner19, corner6, corner10)
+    corner12 = find_intersection(corner2, corner17, corner11, corner15)
+    corner13 = find_intersection(corner3, corner18, corner11, corner15)
+    corner14 = find_intersection(corner4, corner19, corner11, corner15)
 
     if is_ball_in_range(ball, corner1, corner2, corner6, corner7):
         return 1
@@ -262,7 +278,7 @@ def soccerDetectAndDraw(img):
             goal_height_right = down_right[1] - top_right[1]
             goal_height_left = down_left[1] - top_left[1]
 
-            if goal_height_left / ball_height > 8.5 or goal_height_right / ball_height > 8.5:
+            if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
                 is_shoot_time = red_server.get("shoot_time")
                 if is_shoot_time:
                     locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
