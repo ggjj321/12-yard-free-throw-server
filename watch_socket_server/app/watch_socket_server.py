@@ -1,13 +1,7 @@
-import socket
 import redis
-import threading
-
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server_address = ("0.0.0.0", 2222)
-server_socket.bind(server_address)
-
-server_socket.listen(1)
+import asyncio
+import websockets
+import time
 
 # 接受客戶端連接
 
@@ -15,23 +9,23 @@ red_server = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 print("socket start")
 
-def handle_watch_message(watch_socket):
+async def hello(websocket):
     while True:
-        data = watch_socket.recv(1024).decode('utf-8')
-        print(data)
-        try:
-            if data == "start shoot":
-                red_server.set('is_shoot_time', "True")
-                watch_socket.send("success".encode('utf-8'))
-                
-        except socket.error:
-            watch_socket.close()
+        data = await websocket.recv()
+        if data == "start shoot":
+            red_server.set('is_shoot_time', "True")
+            r = f'success'
+            await websocket.send(r)
+        while red_server.get("is_shoot_time") == "True":
+            time.sleep(0.05)
+        r = f'finish'
+        await websocket.send(r)
+        # time.sleep(2)
+        # r = f'finish'
+        # await websocket.send(r)
+        # print(f'Server Sent: {r}')
 
-while True:
-    try:
-        watch_socket, watch_address = server_socket.accept()
-        receive_socket_thread = threading.Thread(target=handle_watch_message, args=(watch_socket,), daemon=True)
-        receive_socket_thread.start()
-    except socket.error:
-        server_socket.close()
-server_socket.close()
+start_server = websockets.serve(hello, "0.0.0.0", 2222)
+
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()

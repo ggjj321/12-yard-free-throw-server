@@ -14,8 +14,7 @@ services:
       - ./watch_socket_server/app:/app
     command: >
         sh -c "python watch_socket_server.py"
-    stop_signal: SIGINT
-
+    
   webrtc_od_detect_server:
     build: 
       context: webrtc_od_detect_server

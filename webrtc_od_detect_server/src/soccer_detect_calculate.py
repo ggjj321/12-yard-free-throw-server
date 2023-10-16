@@ -202,8 +202,6 @@ def record_shoot_status(locate):
 def soccerDetectAndDraw(img):
     is_shoot_time = red_server.get("is_shoot_time").decode()
 
-    print(is_shoot_time)
-
     if is_shoot_time == "False":
         return img
 
@@ -274,13 +272,20 @@ def soccerDetectAndDraw(img):
         draw_split_line(img, top_left, down_left, top_right, top_basis, down_basis, left_basis, right_basis)
 
         if detect_object["ball"].confidence != None:
+            cv2.rectangle(img, (detect_object["ball"].x_min, detect_object["ball"].y_min), (detect_object["ball"].x_max, detect_object["ball"].y_max), (0, 255, 0), 2)
             ball_height = detect_object["ball"].y_max - detect_object["ball"].y_min
             goal_height_right = down_right[1] - top_right[1]
             goal_height_left = down_left[1] - top_left[1]
 
-            if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
-                is_shoot_time = red_server.get("shoot_time")
-                if is_shoot_time:
-                    locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
-                    record_shoot_status(locate)
+            print(goal_height_left / ball_height)
+            print(goal_height_right / ball_height)
+
+            print(detect_object["ball"].confidence)
+
+            if detect_object["ball"].confidence > 0.65:
+                if goal_height_left / ball_height > 10 or goal_height_right / ball_height > 10:
+                    is_shoot_time = red_server.get("shoot_time")
+                    if is_shoot_time:
+                        locate = detect_ball_local(detect_object["ball"], top_left, top_right, down_left, down_right, top_basis, down_basis, right_basis, left_basis)
+                        record_shoot_status(locate)
     return img
