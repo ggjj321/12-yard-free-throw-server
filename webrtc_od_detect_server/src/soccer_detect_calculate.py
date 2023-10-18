@@ -195,6 +195,7 @@ def record_shoot_status(locate):
         shoot_time = int(red_server.get("shoot_time"))
 
         red_server.set('is_shoot_time', "False")
+        red_server.set("preesent_shoot_field", str(locate))
         red_server.set('shoot_time', shoot_time + 1)
         red_server.set('grid_shoot_data', grid_shoot_data_json)
 

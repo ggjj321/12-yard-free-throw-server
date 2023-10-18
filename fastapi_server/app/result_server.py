@@ -16,7 +16,9 @@ def read_root(total_shoot_time : int, shoot_target : int):
         grid_shoot_data[str(grid_index)] = 0
     
     red_server.set('shoot_time', 0)
+    red_server.set("total_shoot_time", str(total_shoot_time))
     red_server.set('is_shoot_time', "True")
+    red_server.set("preesent_shoot_field", "not_set")
     grid_shoot_data_json = json.dumps(grid_shoot_data)   
     red_server.set("grid_shoot_data", grid_shoot_data_json)
     
